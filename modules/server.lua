@@ -2,6 +2,7 @@ local server = {}
 local sock = require("modules.sock")
 
 local physicsInstance = require("yan.instance.physics_instance")
+local mapLoader = require("modules.mapLoader")
 
 server.Geese = {}
 server.Map = {}
@@ -21,6 +22,8 @@ function server:Start(map)
     )
     
     ground.body:setY(400)
+    mapLoader:Init(self.World)
+    mapLoader:Load("the greatest level of all time.goose")
 
     self.Server:on("connect", function (data, client)
         print("Player"..tostring(client:getIndex()).." has joined")
@@ -36,12 +39,16 @@ function server:Start(map)
         )
 
         local goose = self.Geese[tostring(client:getIndex())]
+
+        goose.body:setX(200)
         
         goose.direction = 1
         goose.onGround = false
         goose.speed = 5000
         goose.maxSpeed = 400
         goose.jumpHeight = 1500
+
+        client:send("index", client:getIndex())
     end)
     
     self.Server:on("move", function (data, client)
@@ -86,7 +93,8 @@ function server:Start(map)
         end
         
         client:send("game", {
-            Geese = geeseSimplified
+            Geese = geeseSimplified,
+            Map = mapLoader.data
         })
     end)
 
