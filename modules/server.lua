@@ -46,11 +46,7 @@ function server:Start(map)
     
     self.Server:on("move", function (data, client)
         local goose = self.Geese[tostring(client:getIndex())]
-        
-        if #goose.body:getContacts() >= 1 then
-            goose.onGround = true
-        end
-    
+
         local impulseX = 0
         local impulseY = 0
             
@@ -67,11 +63,20 @@ function server:Start(map)
         end
     end)
 
+    self.Server:on("jump", function (data, client)
+        local goose = self.Geese[tostring(client:getIndex())]
+
+        if #goose.body:getContacts() >= 1 then
+            goose:ApplyLinearImpulse(0, -goose.jumpHeight, goose.maxSpeed, math.huge)
+        end
+    end)
+
     self.Server:on("getGame", function (data, client)
         local geeseSimplified = {}
 
         for k, goose in pairs(self.Geese) do
             goose:Update()
+
             
             geeseSimplified[k] = {
                 x = goose.body:getX(),
@@ -101,8 +106,6 @@ function server:Update(dt)
             y = goose.body:getY(),
             direction = goose.direction,
         }
-
-        print(k, goose.body:getY())
     end
     
     self.Server:sendToAll("updateGeese", geeseSimplified)

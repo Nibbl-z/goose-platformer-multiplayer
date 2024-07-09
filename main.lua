@@ -15,9 +15,7 @@ function love.keypressed(key, scancode, rep)
         client:Join("localhost", 21114)
     end
 
-    if client.Client ~= nil then
-        client:KeyPressed(key, scancode, rep)
-    end
+    client:KeyPressed(key, scancode, rep)
 end
 
 function love.update(dt)

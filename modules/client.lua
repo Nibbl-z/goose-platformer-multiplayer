@@ -59,7 +59,10 @@ function client:Update(dt)
 end
 
 function client:KeyPressed(key, scancode, rep)
-    
+    if self.Client == nil then return end
+    if key == "space" then
+        self.Client:send("jump")
+    end
 end
 
 function client:Draw()
