@@ -23,7 +23,7 @@ function server:Start(map)
     
     ground.body:setY(400)
     mapLoader:Init(self.World)
-    mapLoader:Load("the greatest level of all time.goose")
+    mapLoader:Load("test.goose")
 
     self.Server:on("connect", function (data, client)
         print("Player"..tostring(client:getIndex()).." has joined")

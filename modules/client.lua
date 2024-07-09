@@ -11,7 +11,10 @@ local cameraY = 0
 local cX, cY = 0, 0
 
 local sprites = {
-    Player = "player.png"
+    Player = "player.png",
+    Lava = "lava.png",
+    Finish = "finish.png",
+    Checkpoint = "checkpoint.png"
 }
 
 function client:Init()
@@ -26,7 +29,7 @@ function client:Join(ip, port)
     local status, err = pcall(function() 
         self.Client:connect()
     end)
-
+    
     print(status, err)
 
     if status then
@@ -41,7 +44,7 @@ function client:Join(ip, port)
         self.Client:on("updateGeese", function (data)
             geese = data
         end)
-
+        
         self.Client:send("connect")
     end
     
@@ -98,13 +101,23 @@ function client:Draw()
     love.graphics.setBackgroundColor(1,1,1,1)
     love.graphics.setColor(1,1,1,1)
     for k, goose in pairs(geese) do
-        
         love.graphics.draw(sprites.Player, goose.x - cameraX, goose.y - cameraY, 0, goose.direction, 1, 25, 25)
     end
 
-    for _, platform in ipairs(map) do
-        love.graphics.setColor(platform.R, platform.G, platform.B, 1)
-        love.graphics.rectangle("fill", platform.X - cameraX, platform.Y - cameraY, platform.W, platform.H, 10, 10)
+    for _, p in ipairs(map) do
+        if p.T == 1 then
+            love.graphics.setColor(p.R, p.G, p.B, 1)
+            love.graphics.rectangle("fill", p.X - cameraX, p.Y - cameraY, p.W, p.H, 10, 10)
+        elseif p.T == 2 then
+            love.graphics.setColor(1,1,1, 1)
+            love.graphics.draw(sprites.Lava, p.X - cameraX, p.Y - cameraY, 0, p.W/ 100, p.H / 100)
+        elseif p.T == 3 then
+            love.graphics.setColor(1,1,1, 1)
+            love.graphics.draw(sprites.Checkpoint, p.X - cameraX, p.Y - cameraY, 0, 1, 1, 12.5, 25)
+        elseif p.T == 4 then
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.draw(sprites.Finish, p.X - cameraX, p.Y - cameraY)
+        end
     end
 end
 
