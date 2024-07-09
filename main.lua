@@ -5,7 +5,7 @@ function love.load()
     
 end
 
-function love.keypressed(key)
+function love.keypressed(key, scancode, rep)
     if key == "q" then
         server:Start()
     end
@@ -13,6 +13,10 @@ function love.keypressed(key)
     if key == "e" then
         client:Init()
         client:Join("localhost", 21114)
+    end
+
+    if client.Client ~= nil then
+        client:KeyPressed(key, scancode, rep)
     end
 end
 

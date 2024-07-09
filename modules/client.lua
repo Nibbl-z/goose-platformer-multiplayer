@@ -37,18 +37,35 @@ function client:Join(ip, port)
     print(status, err)
 end
 
-function client:Update()
+local movementDirections = {a = {-1,0}, d = {1,0}}
+
+function client:Update(dt)
     if self.Client == nil then return end
     if geese == nil then
         self.Client:send("getGame")
+    end
+
+    for key, mult in pairs(movementDirections) do
+        if love.keyboard.isDown(key) then
+            self.Client:send("move", {
+                mult = mult,
+                key = key,
+                dt = dt
+            })
+        end
     end
     
     self.Client:update()
 end
 
+function client:KeyPressed(key, scancode, rep)
+    
+end
+
 function client:Draw()
     if self.Client == nil then return end
     if geese == nil then return end
+
     for k, goose in pairs(geese) do
         love.graphics.draw(sprites.Player, goose.x, goose.y, 0, goose.direction, 1, 25, 25)
     end
