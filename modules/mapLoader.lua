@@ -42,12 +42,8 @@ function mapLoader:Init(w)
     world = w
 end
 
-function mapLoader:Load(filename)
-    love.filesystem.setIdentity("goose-platformer-multiplayer")
-    
-    self.data = mapLoader:GooseToTable(love.filesystem.read(filename))
-    
-    for _, platform in ipairs(self.data) do
+function mapLoader:Load(data)  
+    for _, platform in ipairs(data) do
         local p = {}
         
         p.body = love.physics.newBody(world, platform.X + (platform.W / 2), platform.Y + (platform.H / 2), "static")

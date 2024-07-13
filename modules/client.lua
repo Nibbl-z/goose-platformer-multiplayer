@@ -1,8 +1,11 @@
 local client = {}
 local sock = require("modules.sock")
+local mapLoader = require("modules.mapLoader")
 
 local geese = nil
-local map = nil
+local geesePhysics = {}
+local mapData = nil
+local mapPhysics = {}
 local index = nil
 
 local cameraX = 0
@@ -16,6 +19,8 @@ local sprites = {
     Finish = "finish.png",
     Checkpoint = "checkpoint.png"
 }
+
+local physicsInstance = require("yan.instance.physics_instance")
 
 function client:Init()
     for name, sprite in pairs(sprites) do
@@ -38,7 +43,9 @@ function client:Join(ip, port)
         end)
         self.Client:on("game", function (data)
             geese = data.Geese
-            map = data.Map
+            mapData = mapLoader:GooseToTable(data.Map)
+            
+            mapLoader:Load(mapData)
         end)
 
         self.Client:on("updateGeese", function (data)
@@ -46,6 +53,25 @@ function client:Join(ip, port)
         end)
         
         self.Client:send("connect")
+        
+        world = love.physics.newWorld(0, 1000, true)
+        mapLoader:Init(world)
+        goose = physicsInstance:New(
+            nil,
+            world,
+            "dynamic",
+            "rectangle",
+            {X = 50, Y = 50},
+            0,
+            1
+        )
+
+        goose.body:setX(200)
+        goose.direction = 1
+        goose.onGround = false
+        goose.speed = 5000
+        goose.maxSpeed = 400
+        goose.jumpHeight = 1500
     end
     
     print(status, err)
@@ -59,52 +85,90 @@ end
 
 function client:Update(dt)
     if self.Client == nil then return end
+
     if geese == nil then
         self.Client:send("getGame")
+    else
+        for _, g in ipairs(geese) do
+            if g.id ~= index then 
+                if geesePhysics[g.id] == nil then
+                    geesePhysics[g.id] = physicsInstance:New(
+                        nil,
+                        world,
+                        "static",
+                        "rectangle",
+                        {X = 50, Y = 50},
+                        0,
+                        1
+                    )
+                end
+                
+                geesePhysics[g.id].body:setX(g.x)
+                geesePhysics[g.id].body:setY(g.y)
+            end
+        end
     end
 
     for key, mult in pairs(movementDirections) do
         if love.keyboard.isDown(key) then
-            self.Client:send("move", {
-                mult = mult,
-                key = key,
-                dt = dt
-            })
+            local impulseX = 0
+            local impulseY = 0
+                
+            impulseX = goose.speed * mult[1] * dt
+            
+            if key == "a" then
+                goose.direction = 1
+            elseif key == "d" then
+                goose.direction = -1
+            end
+            
+            if not goose.disableMovement then 
+                goose:ApplyLinearImpulse(impulseX, impulseY, goose.maxSpeed, math.huge)
+            end
         end
     end
-    
-    if geese ~= nil then
-        local myGoose = geese[tostring(index)]
 
-        cX = lerp(cX, myGoose.x, 0.1)
-        cY = lerp(cY, myGoose.y, 0.1)
-        
-        cameraX = cX - 400
-        cameraY = cY - 200
-    end
+    cX = lerp(cX, goose.body:getX(), 0.1)
+    cY = lerp(cY, goose.body:getY(), 0.1)
     
+    cameraX = cX - 400
+    cameraY = cY - 200
+
+    self.Client:send("updatePosition", {
+        x = goose.body:getX(),
+        y = goose.body:getY(),
+        direction = goose.direction
+    })
     
+    world:update(dt)
     self.Client:update()
 end
 
 function client:KeyPressed(key, scancode, rep)
     if self.Client == nil then return end
     if key == "space" then
-        self.Client:send("jump")
+        if #goose.body:getContacts() >= 1 then
+            goose:ApplyLinearImpulse(0, -goose.jumpHeight, goose.maxSpeed, math.huge)
+        end
     end
 end
 
 function client:Draw()
     if self.Client == nil then return end
     if geese == nil then return end
-    if map == nil then return end
+    if mapData == nil then return end
     love.graphics.setBackgroundColor(1,1,1,1)
     love.graphics.setColor(1,1,1,1)
-    for k, goose in pairs(geese) do
-        love.graphics.draw(sprites.Player, goose.x - cameraX, goose.y - cameraY, 0, goose.direction, 1, 25, 25)
+    
+    for k, g in pairs(geese) do
+        if g.id ~= index then
+            love.graphics.draw(sprites.Player, g.x - cameraX, g.y - cameraY, 0, g.direction, 1, 25, 25)
+        end
     end
+    
+    love.graphics.draw(sprites.Player, goose.body:getX() - cameraX, goose.body:getY() - cameraY, 0, goose.direction, 1, 25, 25)
 
-    for _, p in ipairs(map) do
+    for _, p in ipairs(mapData) do
         if p.T == 1 then
             love.graphics.setColor(p.R, p.G, p.B, 1)
             love.graphics.rectangle("fill", p.X - cameraX, p.Y - cameraY, p.W, p.H, 10, 10)
