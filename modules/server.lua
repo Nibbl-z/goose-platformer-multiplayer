@@ -1,11 +1,10 @@
 local server = {}
 local sock = require("modules.sock")
 
-
-
-
 server.Geese = {}
 server.Map = {}
+
+local playerPingTimes = {}
 
 local respawnDelay = {}
 
@@ -52,12 +51,24 @@ function server:Start(map)
         })
     end)
 
+    self.Server:on("ping", function (data, client)
+        playerPingTimes[tostring(client:getIndex())] = love.timer.getTime() + 3
+    end)
+
     print("Server started!")
 end
 
 function server:Update(dt)
     if self.Server == nil then return end
     
+    for k, v in pairs(playerPingTimes) do
+        if love.timer:getTime() > v then
+            self.Geese[k] = nil
+            self.Server:sendToAll("disconnect", k)
+            playerPingTimes[k] = nil
+        end
+    end
+
     self.Server:sendToAll("updateGeese", self.Geese)
     self.Server:update()
 end

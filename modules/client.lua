@@ -22,6 +22,8 @@ local sprites = {
 
 local physicsInstance = require("yan.instance.physics_instance")
 
+local pingInterval = love.timer.getTime()
+
 function client:Init()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
@@ -38,6 +40,8 @@ function client:Join(ip, port)
     print(status, err)
 
     if status then
+        pingInterval = love.timer.getTime() + 1
+
         self.Client:on("index", function (data)
             index = data
         end)
@@ -71,6 +75,10 @@ function client:Join(ip, port)
             end
         end)
         
+        self.Client:on("disconnect", function (data)
+            geesePhysics[tonumber(data)] = nil
+        end)
+
         self.Client:send("connect")
         
         world = love.physics.newWorld(0, 1000, true)
@@ -139,6 +147,11 @@ function client:Update(dt)
         y = goose.body:getY(),
         direction = goose.direction
     })
+    
+    if love.timer.getTime() > pingInterval then
+        self.Client:send("ping")
+        pingInterval = love.timer.getTime() + 1
+    end
     
     world:update(dt)
     self.Client:update()
