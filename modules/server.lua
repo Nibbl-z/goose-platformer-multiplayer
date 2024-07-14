@@ -18,7 +18,7 @@ function server:Start(map)
     
 
     love.filesystem.setIdentity("goose-platformer-multiplayer")
-    self.Map = love.filesystem.read("test.goose")
+    self.Map = love.filesystem.read(map)
     
    -- self.World:setCallbacks(beginContact, endContact)
     

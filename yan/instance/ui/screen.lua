@@ -22,6 +22,8 @@ function screen:New(o)
     local clicked = {}
     
     function o:Update()
+        if o.Enabled == false then return end
+        
         local mX, mY = love.mouse.getPosition()
         local isDown = love.mouse.isDown(1)
         

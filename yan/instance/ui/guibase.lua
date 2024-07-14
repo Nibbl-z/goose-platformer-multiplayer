@@ -80,8 +80,10 @@ function guiBase:New(o, screen)
 
     function o:Draw()
         local pX, pY, sX, sY = o:GetDrawingCoordinates()
-
-        love.graphics.rectangle("line", pX, pY, sX, sY)
+        
+        love.graphics.setColor(o.Color.R, o.Color.G, o.Color.B, o.Color.A)
+        love.graphics.rectangle("fill", pX, pY, sX, sY, 10, 10)
+        love.graphics.setColor(1,1,1,1)
     end
 
     function o:SetPosition(xS, xO, yS, yO)

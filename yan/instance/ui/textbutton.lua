@@ -40,7 +40,7 @@ function textbutton:New(o, screen, text, textSize, align, verticalAlign)
         local yOffset = 0
 
         if o.VerticalAlign == "center" then
-            yOffset = sY * 0.5 - (o.TextSize)
+            yOffset = yOffset + 10
         elseif o.VerticalAlign == "bottom" then
             yOffset = sY * 1
         end
