@@ -31,8 +31,13 @@ function server:Start(map)
             direction = 1,
             id = client:getIndex()
         }
-
+        
         client:send("index", client:getIndex())
+    end)
+
+    self.Server:on("setUsername", function (data, client)
+        print(data)
+        self.Geese[tostring(client:getIndex())].username = data
     end)
     
     self.Server:on("updatePosition", function (data, client)

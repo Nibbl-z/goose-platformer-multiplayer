@@ -135,7 +135,7 @@ function love.load()
         confirmJoin:SetButtonColor(0.6, 0.6, 0.6, 1)
 
         client:Init()
-        client:Join(ipInput.Text, 21114)
+        client:Join(ipInput.Text, 21114, usernameInput.Text)
 
         menu.Enabled = false
         joinOptionsScreen.Enabled = false
@@ -274,7 +274,7 @@ function love.load()
         server:Start(levelList[currentLevel])
         
         client:Init()
-        client:Join("localhost", 21114)
+        client:Join("localhost", 21114, hostusernameInput.Text)
         
         menu.Enabled = false
         hostOptionsScreen.Enabled = false

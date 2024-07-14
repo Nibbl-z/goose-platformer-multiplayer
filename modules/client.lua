@@ -10,7 +10,7 @@ local index = nil
 
 local cameraX = 0
 local cameraY = 0
-
+local username = ""
 local cX, cY = 0, 0
 
 local sprites = {
@@ -28,9 +28,12 @@ function client:Init()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
+
+    usernameFont = love.graphics.newFont(14)
+    love.graphics.setFont(usernameFont)
 end
 
-function client:Join(ip, port)
+function client:Join(ip, port, name)
     self.Client = sock.newClient(ip, port)
     
     local status, err = pcall(function() 
@@ -40,6 +43,8 @@ function client:Join(ip, port)
     print(status, err)
 
     if status then
+        username = name
+
         pingInterval = love.timer.getTime() + 1
 
         self.Client:on("index", function (data)
@@ -78,9 +83,9 @@ function client:Join(ip, port)
         self.Client:on("disconnect", function (data)
             geesePhysics[tonumber(data)] = nil
         end)
-
-        self.Client:send("connect")
         
+        
+
         world = love.physics.newWorld(0, 1000, true)
         mapLoader:Init(world)
         goose = physicsInstance:New(
@@ -115,6 +120,8 @@ function client:Update(dt)
     
     if geese == nil then
         self.Client:send("getGame")
+        
+        self.Client:send("setUsername", username)
     end
 
     for key, mult in pairs(movementDirections) do
@@ -176,6 +183,10 @@ function client:Draw()
     for k, g in pairs(geese) do
         if g.id ~= index then
             love.graphics.draw(sprites.Player, g.x - cameraX, g.y - cameraY, 0, g.direction, 1, 25, 25)
+            love.graphics.setColor(0,0,0,0.5)
+            print(g.username)
+            love.graphics.printf(g.username, g.x - cameraX - 100, g.y - cameraY - 50, 200, "center")
+            love.graphics.setColor(1,1,1,1)
         end
     end
     
@@ -184,7 +195,7 @@ function client:Draw()
         print(g.body:getX(), g.body:getY())
         love.graphics.rectangle("line", g.body:getX() - cameraX - 25, g.body:getY() - cameraY - 25, 50, 50)
     end]]
-
+    
     love.graphics.setColor(1,1,1,1)
     
     love.graphics.draw(sprites.Player, goose.body:getX() - cameraX, goose.body:getY() - cameraY, 0, goose.direction, 1, 25, 25)
