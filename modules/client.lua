@@ -1,6 +1,7 @@
 local client = {}
 local sock = require("modules.sock")
 local mapLoader = require("modules.mapLoader")
+local collision = require("modules.collision")
 
 local geese = nil
 local geesePhysics = {}
@@ -12,6 +13,8 @@ local cameraX = 0
 local cameraY = 0
 local username = ""
 local cX, cY = 0, 0
+
+local checkpointX, checkpointY = 200, 0
 
 local respawnDelay = false
 
@@ -127,6 +130,25 @@ function client:Update(dt)
         
         self.Client:send("setUsername", username)
     end
+    
+    if mapData ~= nil then
+        for _, p in ipairs(mapData) do
+            if p.T == 3 then
+                if collision:CheckCollision(
+                    goose.body:getX(), goose.body:getY(), 52, 56,
+                    p.X, p.Y, p.W, p.H
+                ) then
+                    --[[if self.checkpointX ~= p.X and self.checkpointY ~= p.Y then
+                        --sounds.Checkpoint:play()
+                    end]]
+                    checkpointX = p.X
+                    checkpointY = p.Y
+                    break
+                end
+            end
+        end
+    end
+    
 
     for key, mult in pairs(movementDirections) do
         if love.keyboard.isDown(key) then
@@ -154,10 +176,15 @@ function client:Update(dt)
     cameraY = cY - 200
 
     if respawnDelay then
-        goose.body:setX(200)
-        goose.body:setY(0)
+        goose.body:setX(checkpointX)
+        goose.body:setY(checkpointY)
         
         respawnDelay = false
+    end
+
+    if goose.body:getY() > 1000 then
+        goose.body:setX(checkpointX)
+        goose.body:setY(checkpointY)
     end
 
     self.Client:send("updatePosition", {
