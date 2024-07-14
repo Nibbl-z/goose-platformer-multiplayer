@@ -50,6 +50,25 @@ function client:Join(ip, port)
 
         self.Client:on("updateGeese", function (data)
             geese = data
+
+            for _, g in pairs(geese) do
+                if g.id ~= index then 
+                    if geesePhysics[g.id] == nil then
+                        geesePhysics[g.id] = physicsInstance:New(
+                            nil,
+                            world,
+                            "dynamic",
+                            "rectangle",
+                            {X = 50, Y = 50},
+                            0,
+                            1
+                        )
+                    end
+                    
+                    geesePhysics[g.id].body:setX(g.x)
+                    geesePhysics[g.id].body:setY(g.y)
+                end
+            end
         end)
         
         self.Client:send("connect")
@@ -85,28 +104,9 @@ end
 
 function client:Update(dt)
     if self.Client == nil then return end
-
+    
     if geese == nil then
         self.Client:send("getGame")
-    else
-        for _, g in ipairs(geese) do
-            if g.id ~= index then 
-                if geesePhysics[g.id] == nil then
-                    geesePhysics[g.id] = physicsInstance:New(
-                        nil,
-                        world,
-                        "static",
-                        "rectangle",
-                        {X = 50, Y = 50},
-                        0,
-                        1
-                    )
-                end
-                
-                geesePhysics[g.id].body:setX(g.x)
-                geesePhysics[g.id].body:setY(g.y)
-            end
-        end
     end
 
     for key, mult in pairs(movementDirections) do
@@ -165,6 +165,14 @@ function client:Draw()
             love.graphics.draw(sprites.Player, g.x - cameraX, g.y - cameraY, 0, g.direction, 1, 25, 25)
         end
     end
+    
+    --[[for k, g in pairs(geesePhysics) do
+        love.graphics.setColor(0,0,1,1)
+        print(g.body:getX(), g.body:getY())
+        love.graphics.rectangle("line", g.body:getX() - cameraX - 25, g.body:getY() - cameraY - 25, 50, 50)
+    end]]
+
+    love.graphics.setColor(1,1,1,1)
     
     love.graphics.draw(sprites.Player, goose.body:getX() - cameraX, goose.body:getY() - cameraY, 0, goose.direction, 1, 25, 25)
 
