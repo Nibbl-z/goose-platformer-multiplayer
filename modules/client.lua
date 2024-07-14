@@ -2,6 +2,7 @@ local client = {}
 local sock = require("modules.sock")
 local mapLoader = require("modules.mapLoader")
 local collision = require("modules.collision")
+local pause = require("modules.pause")
 
 local geese = nil
 local geesePhysics = {}
@@ -36,6 +37,7 @@ function client:Init()
 
     usernameFont = love.graphics.newFont(14)
     love.graphics.setFont(usernameFont)
+    pause:Init(self)
 end
 
 function client:Join(ip, port, name)
@@ -88,9 +90,6 @@ function client:Join(ip, port, name)
         self.Client:on("disconnect", function (data)
             geesePhysics[tonumber(data)] = nil
         end)
-        
-        
-        
         world = love.physics.newWorld(0, 1000, true)
         world:setCallbacks(beginContact, nil)
         mapLoader:Init(world)
@@ -122,6 +121,21 @@ local function lerp(a, b, t)
     return t < 0.5 and a + (b - a) * t or b + (a - b) * (1 - t)
 end
 
+function client:Restart()
+    if self.Client == nil then return end
+    if goose == nil then return end
+
+    goose.body:setX(200)
+    goose.body:setY(0)
+
+    checkpointX = 200
+    checkpointY = 0
+end
+
+function client:Leave()
+    self.Client:send("leave")
+end
+
 function client:Update(dt)
     if self.Client == nil then return end
     
@@ -131,6 +145,8 @@ function client:Update(dt)
         self.Client:send("setUsername", username)
     end
     
+    pause:Update()
+
     if mapData ~= nil then
         for _, p in ipairs(mapData) do
             if p.T == 3 then
@@ -209,6 +225,10 @@ function client:KeyPressed(key, scancode, rep)
             goose:ApplyLinearImpulse(0, -goose.jumpHeight, goose.maxSpeed, math.huge)
         end
     end
+
+    if key == "escape" then
+        pause.paused = not pause.paused
+    end
 end
 
 function client:Draw()
@@ -253,6 +273,8 @@ function client:Draw()
             love.graphics.draw(sprites.Finish, p.X - cameraX, p.Y - cameraY)
         end
     end
+
+    pause:Draw()
 end
 
 function beginContact(a, b)

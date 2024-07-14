@@ -55,11 +55,17 @@ function server:Start(map)
             Map = self.Map
         })
     end)
-
+    
     self.Server:on("ping", function (data, client)
         playerPingTimes[tostring(client:getIndex())] = love.timer.getTime() + 3
     end)
 
+    self.Server:on("leave", function (data, client)
+        self.Geese[tostring(client:getIndex())] = nil
+        self.Server:sendToAll("disconnect", tostring(client:getIndex()))
+        playerPingTimes[tostring(client:getIndex())] = nil
+    end)
+    
     print("Server started!")
 end
 
