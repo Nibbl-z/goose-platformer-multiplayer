@@ -32,7 +32,7 @@ function textbutton:New(o, screen, text, textSize, align, verticalAlign)
         
         love.graphics.setColor(o.ButtonColor.R, o.ButtonColor.G, o.ButtonColor.B, o.ButtonColor.A)
         
-        love.graphics.rectangle("fill", pX, pY, sX, sY, 5, 5)
+        love.graphics.rectangle("fill", pX, pY, sX, sY, 10, 10)
         
         love.graphics.setFont(o.Font)
         love.graphics.setColor(o.Color.R, o.Color.G, o.Color.B, o.Color.A)

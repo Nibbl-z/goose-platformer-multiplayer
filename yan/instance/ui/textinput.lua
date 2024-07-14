@@ -72,7 +72,7 @@ function textinput:New(o, screen, placeholderText, textSize)
         
         love.graphics.setColor(o.Color.R, o.Color.G, o.Color.B, o.Color.A)
         
-        love.graphics.rectangle("fill", pX, pY, sX, sY, 0, 0)
+        love.graphics.rectangle("fill", pX, pY, sX, sY, 10, 10)
         
         love.graphics.setFont(o.Font)
         
