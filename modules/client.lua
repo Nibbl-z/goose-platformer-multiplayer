@@ -13,6 +13,8 @@ local cameraY = 0
 local username = ""
 local cX, cY = 0, 0
 
+local respawnDelay = false
+
 local sprites = {
     Player = "player.png",
     Lava = "lava.png",
@@ -85,8 +87,9 @@ function client:Join(ip, port, name)
         end)
         
         
-
+        
         world = love.physics.newWorld(0, 1000, true)
+        world:setCallbacks(beginContact, nil)
         mapLoader:Init(world)
         goose = physicsInstance:New(
             nil,
@@ -97,7 +100,8 @@ function client:Join(ip, port, name)
             0,
             1
         )
-
+        
+        goose.fixture:setUserData("player")
         goose.body:setX(200)
         goose.direction = 1
         goose.onGround = false
@@ -148,6 +152,13 @@ function client:Update(dt)
     
     cameraX = cX - 400
     cameraY = cY - 200
+
+    if respawnDelay then
+        goose.body:setX(200)
+        goose.body:setY(0)
+        
+        respawnDelay = false
+    end
 
     self.Client:send("updatePosition", {
         x = goose.body:getX(),
@@ -214,6 +225,12 @@ function client:Draw()
             love.graphics.setColor(1,1,1,1)
             love.graphics.draw(sprites.Finish, p.X - cameraX, p.Y - cameraY)
         end
+    end
+end
+
+function beginContact(a, b)
+    if a:getUserData() == "player" and b:getUserData() == "lava" then
+        respawnDelay = true
     end
 end
 
