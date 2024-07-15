@@ -23,6 +23,9 @@ function RefreshLevels()
     end
 end
 
+function BackToMenu()
+    menu.Enabled = true
+end
 
 function love.load()
     RefreshLevels()
@@ -134,7 +137,7 @@ function love.load()
     confirmJoin.MouseDown = function ()
         confirmJoin:SetButtonColor(0.6, 0.6, 0.6, 1)
 
-        client:Init()
+        client:Init(BackToMenu)
         client:Join(ipInput.Text, 21114, usernameInput.Text)
 
         menu.Enabled = false
@@ -273,7 +276,7 @@ function love.load()
         
         server:Start(levelList[currentLevel])
         
-        client:Init()
+        client:Init(BackToMenu)
         client:Join("localhost", 21114, hostusernameInput.Text)
         
         menu.Enabled = false

@@ -8,6 +8,8 @@ local playerPingTimes = {}
 
 local respawnDelay = {}
 
+local hadPlayers = false
+
 function server:Start(map)
     self.Server = sock.newServer("*", 21114)
    --[[ self.World = love.physics.newWorld(0, 1000, true)
@@ -23,6 +25,7 @@ function server:Start(map)
    -- self.World:setCallbacks(beginContact, endContact)
     
     self.Server:on("connect", function (data, client)
+        hadPlayers = true
         print("Player"..tostring(client:getIndex()).." has joined")
         
         self.Geese[tostring(client:getIndex())] = {
@@ -71,7 +74,7 @@ end
 
 function server:Update(dt)
     if self.Server == nil then return end
-    
+
     for k, v in pairs(playerPingTimes) do
         if love.timer:getTime() > v then
             self.Geese[k] = nil
@@ -82,6 +85,11 @@ function server:Update(dt)
 
     self.Server:sendToAll("updateGeese", self.Geese)
     self.Server:update()
+
+    if hadPlayers and self.Server:getClientCount() <= 0 then
+        self.Server:destroy()
+        self.Server = nil
+    end
 end
 
 return server

@@ -59,6 +59,7 @@ function pause:Init(client)
     end
     
     menuButton.MouseDown = function ()
+        client:Leave()
         self.paused = false
     end
 end

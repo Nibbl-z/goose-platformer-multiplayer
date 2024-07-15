@@ -29,12 +29,17 @@ local sprites = {
 local physicsInstance = require("yan.instance.physics_instance")
 
 local pingInterval = love.timer.getTime()
+local menuReturnFunc
+local isInitialized = false
+function client:Init(f)
+    if isInitialized then return end
+    isInitialized = true
+    menuReturnFunc = f
 
-function client:Init()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
-
+    
     usernameFont = love.graphics.newFont(14)
     love.graphics.setFont(usernameFont)
     pause:Init(self)
@@ -124,7 +129,7 @@ end
 function client:Restart()
     if self.Client == nil then return end
     if goose == nil then return end
-
+    
     goose.body:setX(200)
     goose.body:setY(0)
 
@@ -134,10 +139,20 @@ end
 
 function client:Leave()
     self.Client:send("leave")
+    self.Client:disconnect()
+    self.Client = nil
+    --[[mapData = nil
+    mapPhysics = nil
+    geese = nil
+    geesePhysics = nil
+    goose = nil
+    index = nil]]
+    menuReturnFunc()
 end
 
 function client:Update(dt)
     if self.Client == nil then return end
+    if goose == nil then return end
     
     if geese == nil then
         self.Client:send("getGame")
