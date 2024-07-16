@@ -36,6 +36,7 @@ local menuReturnFunc
 local isInitialized = false
 
 client.flying = false
+client.airJumping = false
 
 function client:Init(f)
     if isInitialized then return end
@@ -226,7 +227,7 @@ function client:Update(dt)
                 elseif key == "d" then
                     goose.direction = -1
                 end
-                
+
                 if not goose.disableMovement then 
                     flyingX = flyingX + mult[1] * dt * 500
                     flyingY = flyingY + mult[2] * dt * 500
@@ -277,7 +278,7 @@ end
 function client:KeyPressed(key, scancode, rep)
     if self.Client == nil then return end
     if key == "space" then
-        if #goose.body:getContacts() >= 1 then
+        if #goose.body:getContacts() >= 1 or self.airJumping == true then
             goose:ApplyLinearImpulse(0, -goose.jumpHeight, goose.maxSpeed, math.huge)
         end
     end

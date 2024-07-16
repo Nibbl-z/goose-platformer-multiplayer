@@ -29,6 +29,22 @@ function adminpanel:Init(client)
     flyToggle.MouseDown = function ()
         client.flying = not client.flying
     end
+
+    airJumpToggle = textbutton:New(nil, panel, "Toggle Air Jumping", 32, "center", "center")
+    airJumpToggle:SetPosition(0,5,0.1,65)
+    airJumpToggle:SetSize(0.5,0,0.1,0)
+
+    airJumpToggle.MouseEnter = function ()
+        airJumpToggle:SetButtonColor(0.2,0.2,0.2,1)
+    end
+    
+    airJumpToggle.MouseLeave = function ()
+        airJumpToggle:SetButtonColor(0,0,0,1)
+    end
+
+    airJumpToggle.MouseDown = function ()
+        client.airJumping = not client.airJumping
+    end
 end
 
 function adminpanel:Update()
