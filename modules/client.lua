@@ -141,12 +141,13 @@ function client:Leave()
     self.Client:send("leave")
     self.Client:disconnect()
     self.Client = nil
-    --[[mapData = nil
-    mapPhysics = nil
+    mapData = nil
+    mapPhysics = {}
     geese = nil
-    geesePhysics = nil
+    geesePhysics = {}
     goose = nil
-    index = nil]]
+    index = nil
+    checkpointX, checkpointY = 200, 0
     menuReturnFunc()
 end
 
@@ -161,7 +162,7 @@ function client:Update(dt)
     end
     
     pause:Update()
-
+    
     if mapData ~= nil then
         for _, p in ipairs(mapData) do
             if p.T == 3 then
@@ -180,6 +181,7 @@ function client:Update(dt)
         end
     end
     
+    if self.Client == nil then return end
 
     for key, mult in pairs(movementDirections) do
         if love.keyboard.isDown(key) then
@@ -199,7 +201,7 @@ function client:Update(dt)
             end
         end
     end
-
+    
     cX = lerp(cX, goose.body:getX(), 0.1)
     cY = lerp(cY, goose.body:getY(), 0.1)
     
@@ -217,6 +219,8 @@ function client:Update(dt)
         goose.body:setX(checkpointX)
         goose.body:setY(checkpointY)
     end
+    
+    if self.Client == nil then return end
 
     self.Client:send("updatePosition", {
         x = goose.body:getX(),
@@ -258,8 +262,10 @@ function client:Draw()
             love.graphics.draw(sprites.Player, g.x - cameraX, g.y - cameraY, 0, g.direction, 1, 25, 25)
             love.graphics.setColor(0,0,0,0.5)
             print(g.username)
-            love.graphics.printf(g.username, g.x - cameraX - 100, g.y - cameraY - 50, 200, "center")
-            love.graphics.setColor(1,1,1,1)
+            if g.username ~= nil then
+                love.graphics.printf(g.username, g.x - cameraX - 100, g.y - cameraY - 50, 200, "center")
+                love.graphics.setColor(1,1,1,1)
+            end
         end
     end
     

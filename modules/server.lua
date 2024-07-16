@@ -85,10 +85,14 @@ function server:Update(dt)
 
     self.Server:sendToAll("updateGeese", self.Geese)
     self.Server:update()
-
+    
     if hadPlayers and self.Server:getClientCount() <= 0 then
+        print("stopping server")
+        hadPlayers = false
         self.Server:destroy()
         self.Server = nil
+        self.Geese = {}
+        self.Map = {}
     end
 end
 
