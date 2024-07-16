@@ -74,7 +74,7 @@ function pause:Draw()
     love.graphics.setColor(0,0,0,0.5)
     love.graphics.rectangle("fill", 0,0,10000,10000)
     love.graphics.setColor(1,1,1,1)
-
+    
     pauseMenu:Draw()
 end
 

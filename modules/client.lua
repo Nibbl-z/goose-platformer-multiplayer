@@ -3,6 +3,7 @@ local sock = require("modules.sock")
 local mapLoader = require("modules.mapLoader")
 local collision = require("modules.collision")
 local pause = require("modules.pause")
+local adminpanel = require("modules.adminpanel")
 
 local geese = nil
 local geesePhysics = {}
@@ -14,6 +15,8 @@ local cameraX = 0
 local cameraY = 0
 local username = ""
 local cX, cY = 0, 0
+
+local flyingX, flyingY = 0, 0
 
 local checkpointX, checkpointY = 200, 0
 
@@ -31,6 +34,9 @@ local physicsInstance = require("yan.instance.physics_instance")
 local pingInterval = love.timer.getTime()
 local menuReturnFunc
 local isInitialized = false
+
+client.flying = false
+
 function client:Init(f)
     if isInitialized then return end
     isInitialized = true
@@ -43,6 +49,7 @@ function client:Init(f)
     usernameFont = love.graphics.newFont(14)
     love.graphics.setFont(usernameFont)
     pause:Init(self)
+    adminpanel:Init(self)
 end
 
 function client:Join(ip, port, name)
@@ -122,6 +129,8 @@ end
 
 local movementDirections = {a = {-1,0}, d = {1,0}}
 
+local flyingDirections = {a = {-1,0}, d = {1,0}, w = {0,-1}, s = {0,1}}
+
 local function lerp(a, b, t)
     return t < 0.5 and a + (b - a) * t or b + (a - b) * (1 - t)
 end
@@ -162,6 +171,7 @@ function client:Update(dt)
     end
     
     pause:Update()
+    adminpanel:Update()
     
     if mapData ~= nil then
         for _, p in ipairs(mapData) do
@@ -182,25 +192,52 @@ function client:Update(dt)
     end
     
     if self.Client == nil then return end
-
-    for key, mult in pairs(movementDirections) do
-        if love.keyboard.isDown(key) then
-            local impulseX = 0
-            local impulseY = 0
+    
+    if self.flying == false then
+        for key, mult in pairs(movementDirections) do
+            if love.keyboard.isDown(key) then
+                local impulseX = 0
+                local impulseY = 0
+                    
+                impulseX = goose.speed * mult[1] * dt
                 
-            impulseX = goose.speed * mult[1] * dt
-            
-            if key == "a" then
-                goose.direction = 1
-            elseif key == "d" then
-                goose.direction = -1
-            end
-            
-            if not goose.disableMovement then 
-                goose:ApplyLinearImpulse(impulseX, impulseY, goose.maxSpeed, math.huge)
+                if key == "a" then
+                    goose.direction = 1
+                elseif key == "d" then
+                    goose.direction = -1
+                end
+                
+                if not goose.disableMovement then 
+                    goose:ApplyLinearImpulse(impulseX, impulseY, goose.maxSpeed, math.huge)
+                end
             end
         end
+        goose.body:setAwake(true)
+        flyingX = goose.body:getX()
+        flyingY = goose.body:getY()
+    else
+        goose.body:setAwake(false)
+
+        for key, mult in pairs(flyingDirections) do
+            if love.keyboard.isDown(key) then
+
+                if key == "a" then
+                    goose.direction = 1
+                elseif key == "d" then
+                    goose.direction = -1
+                end
+                
+                if not goose.disableMovement then 
+                    flyingX = flyingX + mult[1] * dt * 500
+                    flyingY = flyingY + mult[2] * dt * 500
+                end
+            end
+        end
+
+        goose.body:setX(flyingX)
+        goose.body:setY(flyingY)
     end
+    
     
     cX = lerp(cX, goose.body:getX(), 0.1)
     cY = lerp(cY, goose.body:getY(), 0.1)
@@ -244,9 +281,13 @@ function client:KeyPressed(key, scancode, rep)
             goose:ApplyLinearImpulse(0, -goose.jumpHeight, goose.maxSpeed, math.huge)
         end
     end
-
+    
     if key == "escape" then
         pause.paused = not pause.paused
+    end
+
+    if key == "f2" then
+        adminpanel.open = not adminpanel.open
     end
 end
 
@@ -254,6 +295,9 @@ function client:Draw()
     if self.Client == nil then return end
     if geese == nil then return end
     if mapData == nil then return end
+
+    love.graphics.setFont(usernameFont)
+
     love.graphics.setBackgroundColor(1,1,1,1)
     love.graphics.setColor(1,1,1,1)
     
@@ -296,6 +340,7 @@ function client:Draw()
     end
 
     pause:Draw()
+    adminpanel:Draw()
 end
 
 function beginContact(a, b)

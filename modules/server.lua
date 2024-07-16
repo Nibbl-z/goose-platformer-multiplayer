@@ -11,7 +11,16 @@ local respawnDelay = {}
 local hadPlayers = false
 
 function server:Start(map)
-    self.Server = sock.newServer("*", 21114)
+    local success, err = pcall(function ()
+        self.Server = sock.newServer("*", 21114)
+    end)
+
+    if not success then 
+        print(err)
+        return 
+    end
+
+    
    --[[ self.World = love.physics.newWorld(0, 1000, true)
     
     mapLoader:Init(self.World)
