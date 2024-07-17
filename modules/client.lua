@@ -29,6 +29,11 @@ local sprites = {
     Checkpoint = "checkpoint.png"
 }
 
+local sounds = {
+    Death = {"death.wav", "static"},
+    Checkpoint = {"checkpoint.wav", "static"}
+}
+
 local physicsInstance = require("yan.instance.physics_instance")
 
 local pingInterval = love.timer.getTime()
@@ -45,6 +50,10 @@ function client:Init(f)
 
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
+    end
+
+    for name, sound in pairs(sounds) do
+        sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
     end
     
     usernameFont = love.graphics.newFont(14)
@@ -181,9 +190,10 @@ function client:Update(dt)
                     goose.body:getX(), goose.body:getY(), 52, 56,
                     p.X, p.Y, p.W, p.H
                 ) then
-                    --[[if self.checkpointX ~= p.X and self.checkpointY ~= p.Y then
-                        --sounds.Checkpoint:play()
-                    end]]
+                    if checkpointX ~= p.X and checkpointY ~= p.Y then
+                        sounds.Checkpoint:play()
+                    end
+                    
                     checkpointX = p.X
                     checkpointY = p.Y
                     break
@@ -346,6 +356,7 @@ end
 
 function beginContact(a, b)
     if a:getUserData() == "player" and b:getUserData() == "lava" then
+        sounds.Death:play()
         respawnDelay = true
     end
 end
