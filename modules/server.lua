@@ -10,6 +10,8 @@ local respawnDelay = {}
 
 local hadPlayers = false
 
+local chat = {}
+
 function server:Start(map)
     local success, err = pcall(function ()
         self.Server = sock.newServer("*", 21114)
@@ -64,7 +66,8 @@ function server:Start(map)
     self.Server:on("getGame", function (data, client)
         client:send("game", {
             Geese = self.Geese,
-            Map = self.Map
+            Map = self.Map,
+            Chat = chat
         })
     end)
     
@@ -78,6 +81,14 @@ function server:Start(map)
         playerPingTimes[tostring(client:getIndex())] = nil
     end)
     
+    self.Server:on("chatMessage", function (data, client)
+        print(data)
+        chat[tostring(client:getIndex())] = {
+            message = data, 
+            decayTime = love.timer.getTime() + 5
+        }
+    end)
+
     print("Server started!")
 end
 
@@ -93,6 +104,7 @@ function server:Update(dt)
     end
 
     self.Server:sendToAll("updateGeese", self.Geese)
+    self.Server:sendToAll("updateChat", chat)
     self.Server:update()
     
     if hadPlayers and self.Server:getClientCount() <= 0 then

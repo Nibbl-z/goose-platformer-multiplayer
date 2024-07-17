@@ -22,12 +22,14 @@ local flyingX, flyingY = 0, 0
 local checkpointX, checkpointY = 200, 0
 
 local respawnDelay = false
+local chats = nil
 
 local sprites = {
     Player = "player.png",
     Lava = "lava.png",
     Finish = "finish.png",
-    Checkpoint = "checkpoint.png"
+    Checkpoint = "checkpoint.png",
+    ChatBubble = "chat_bubble.png"
 }
 
 local sounds = {
@@ -84,6 +86,7 @@ function client:Join(ip, port, name)
         self.Client:on("game", function (data)
             geese = data.Geese
             mapData = mapLoader:GooseToTable(data.Map)
+            chats = data.Chat
             
             mapLoader:Load(mapData)
         end)
@@ -110,10 +113,15 @@ function client:Join(ip, port, name)
                 end
             end
         end)
+
+        self.Client:on("updateChat", function(data)
+            chats = data
+        end)
         
         self.Client:on("disconnect", function (data)
             geesePhysics[tonumber(data)] = nil
         end)
+
         world = love.physics.newWorld(0, 1000, true)
         world:setCallbacks(beginContact, nil)
         mapLoader:Init(world)
@@ -207,7 +215,7 @@ function client:Update(dt)
     
     if self.Client == nil then return end
     
-    if chat.open == false then
+    if chat.typing == false then
         if self.flying == false then
             for key, mult in pairs(movementDirections) do
                 if love.keyboard.isDown(key) then
@@ -293,7 +301,7 @@ end
 
 function client:KeyPressed(key, scancode, rep)
     if self.Client == nil then return end
-    if key == "space" and chat.open == false then
+    if key == "space" and chat.typing == false then
         if #goose.body:getContacts() >= 1 or self.airJumping == true then
             goose:ApplyLinearImpulse(0, -goose.jumpHeight, goose.maxSpeed, math.huge)
         end
@@ -338,6 +346,16 @@ function client:Draw()
                 love.graphics.printf(g.username, g.x - cameraX - 100, g.y - cameraY - 50, 200, "center")
                 love.graphics.setColor(1,1,1,1)
             end
+            
+            if chats[tostring(g.id)] ~= nil then
+                if chats[tostring(g.id)].decayTime > love.timer.getTime() then
+                    love.graphics.setColor(1,1,1,1)
+                    love.graphics.draw(sprites.ChatBubble, g.x - cameraX - 100, g.y - cameraY - 125)
+                    love.graphics.setColor(0,0,0,1)
+                    love.graphics.printf(chats[tostring(g.id)].message, g.x - cameraX - 100, g.y - cameraY - 100, 200, "center")
+                    love.graphics.setColor(1,1,1,1)
+                end
+            end
         end
     end
     
@@ -350,6 +368,16 @@ function client:Draw()
     love.graphics.setColor(1,1,1,1)
     
     love.graphics.draw(sprites.Player, goose.body:getX() - cameraX, goose.body:getY() - cameraY, 0, goose.direction, 1, 25, 25)
+    
+    if chats[tostring(index)] ~= nil then
+        if chats[tostring(index)].decayTime > love.timer.getTime() then
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.draw(sprites.ChatBubble, goose.body:getX() - cameraX - 100, goose.body:getY() - cameraY - 125)
+            love.graphics.setColor(0,0,0,1)
+            love.graphics.printf(chats[tostring(index)].message, goose.body:getX() - cameraX - 100, goose.body:getY() - cameraY - 100, 200, "center")
+            love.graphics.setColor(1,1,1,1)
+        end
+    end
 
     for _, p in ipairs(mapData) do
         if p.T == 1 then
