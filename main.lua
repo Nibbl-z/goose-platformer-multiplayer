@@ -291,7 +291,7 @@ function love.load()
     
     hostusernameInput.MouseDown = function ()
         sounds.Select:play()
-        
+
         hostusernameInput:SetColor(0.6, 0.6, 0.6,1)
     end
     
@@ -353,6 +353,8 @@ function love.textinput(t)
     ipInput:TextInput(t)
     usernameInput:TextInput(t)
     hostusernameInput:TextInput(t)
+
+    client:TextInput(t)
 end
 
 function love.draw()

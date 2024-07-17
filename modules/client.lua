@@ -4,6 +4,7 @@ local mapLoader = require("modules.mapLoader")
 local collision = require("modules.collision")
 local pause = require("modules.pause")
 local adminpanel = require("modules.adminpanel")
+local chat = require("modules.chat")
 
 local geese = nil
 local geesePhysics = {}
@@ -60,6 +61,7 @@ function client:Init(f)
     love.graphics.setFont(usernameFont)
     pause:Init(self)
     adminpanel:Init(self)
+    chat:Init(self)
 end
 
 function client:Join(ip, port, name)
@@ -182,7 +184,8 @@ function client:Update(dt)
     
     pause:Update()
     adminpanel:Update()
-    
+    chat:Update()
+     
     if mapData ~= nil then
         for _, p in ipairs(mapData) do
             if p.T == 3 then
@@ -204,50 +207,53 @@ function client:Update(dt)
     
     if self.Client == nil then return end
     
-    if self.flying == false then
-        for key, mult in pairs(movementDirections) do
-            if love.keyboard.isDown(key) then
-                local impulseX = 0
-                local impulseY = 0
+    if chat.open == false then
+        if self.flying == false then
+            for key, mult in pairs(movementDirections) do
+                if love.keyboard.isDown(key) then
+                    local impulseX = 0
+                    local impulseY = 0
+                        
+                    impulseX = goose.speed * mult[1] * dt
                     
-                impulseX = goose.speed * mult[1] * dt
-                
-                if key == "a" then
-                    goose.direction = 1
-                elseif key == "d" then
-                    goose.direction = -1
-                end
-                
-                if not goose.disableMovement then 
-                    goose:ApplyLinearImpulse(impulseX, impulseY, goose.maxSpeed, math.huge)
-                end
-            end
-        end
-        goose.body:setAwake(true)
-        flyingX = goose.body:getX()
-        flyingY = goose.body:getY()
-    else
-        goose.body:setAwake(false)
-
-        for key, mult in pairs(flyingDirections) do
-            if love.keyboard.isDown(key) then
-
-                if key == "a" then
-                    goose.direction = 1
-                elseif key == "d" then
-                    goose.direction = -1
-                end
-
-                if not goose.disableMovement then 
-                    flyingX = flyingX + mult[1] * dt * 500
-                    flyingY = flyingY + mult[2] * dt * 500
+                    if key == "a" then
+                        goose.direction = 1
+                    elseif key == "d" then
+                        goose.direction = -1
+                    end
+                    
+                    if not goose.disableMovement then 
+                        goose:ApplyLinearImpulse(impulseX, impulseY, goose.maxSpeed, math.huge)
+                    end
                 end
             end
+            goose.body:setAwake(true)
+            flyingX = goose.body:getX()
+            flyingY = goose.body:getY()
+        else
+            goose.body:setAwake(false)
+            
+            for key, mult in pairs(flyingDirections) do
+                if love.keyboard.isDown(key) then
+    
+                    if key == "a" then
+                        goose.direction = 1
+                    elseif key == "d" then
+                        goose.direction = -1
+                    end
+    
+                    if not goose.disableMovement then 
+                        flyingX = flyingX + mult[1] * dt * 500
+                        flyingY = flyingY + mult[2] * dt * 500
+                    end
+                end
+            end
+    
+            goose.body:setX(flyingX)
+            goose.body:setY(flyingY)
         end
-
-        goose.body:setX(flyingX)
-        goose.body:setY(flyingY)
     end
+    
     
     
     cX = lerp(cX, goose.body:getX(), 0.1)
@@ -287,7 +293,7 @@ end
 
 function client:KeyPressed(key, scancode, rep)
     if self.Client == nil then return end
-    if key == "space" then
+    if key == "space" and chat.open == false then
         if #goose.body:getContacts() >= 1 or self.airJumping == true then
             goose:ApplyLinearImpulse(0, -goose.jumpHeight, goose.maxSpeed, math.huge)
         end
@@ -296,10 +302,21 @@ function client:KeyPressed(key, scancode, rep)
     if key == "escape" then
         pause.paused = not pause.paused
     end
-
+    
     if key == "f2" then
         adminpanel.open = not adminpanel.open
     end
+
+    if key == "t" and chat.typing == false then
+        chat.open = not chat.open
+    end
+
+    chat:KeyPressed(key, scancode, rep)
+end
+
+function client:TextInput(t)
+    
+    chat:TextInput(t)
 end
 
 function client:Draw()
@@ -349,7 +366,8 @@ function client:Draw()
             love.graphics.draw(sprites.Finish, p.X - cameraX, p.Y - cameraY)
         end
     end
-
+    
+    chat:Draw()
     pause:Draw()
     adminpanel:Draw()
 end
