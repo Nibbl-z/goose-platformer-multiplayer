@@ -5,6 +5,7 @@ local collision = require("modules.collision")
 local pause = require("modules.pause")
 local adminpanel = require("modules.adminpanel")
 local chat = require("modules.chat")
+local wardrobe = require("modules.wardrobe")
 
 local geese = nil
 local geesePhysics = {}
@@ -64,6 +65,7 @@ function client:Init(f)
     pause:Init(self)
     adminpanel:Init(self)
     chat:Init(self)
+    wardrobe:Init()
 end
 
 function client:Join(ip, port, name)
@@ -193,6 +195,7 @@ function client:Update(dt)
     pause:Update()
     adminpanel:Update()
     chat:Update()
+    wardrobe:Update()
      
     if mapData ~= nil then
         for _, p in ipairs(mapData) do
@@ -319,6 +322,10 @@ function client:KeyPressed(key, scancode, rep)
         chat.open = not chat.open
     end
 
+    if key == "c" and chat.typing == false then
+        wardrobe.open = not wardrobe.open
+    end
+
     chat:KeyPressed(key, scancode, rep)
 end
 
@@ -396,6 +403,7 @@ function client:Draw()
     end
     
     chat:Draw()
+    wardrobe:Draw()
     pause:Draw()
     adminpanel:Draw()
 end

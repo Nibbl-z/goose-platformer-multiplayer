@@ -65,6 +65,7 @@ function pause:Init(client)
 end
 
 function pause:Update()
+    if pause.paused == false then return end
     pauseMenu:Update()
 end
 

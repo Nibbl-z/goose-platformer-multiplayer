@@ -13,7 +13,9 @@ local levelList = {}
 local currentLevel = 1
 
 local sounds = {
-    Select = {"select.wav", "static"}
+    Select = {"select.wav", "static"},
+    Menu = {"menu.mp3", "stream"},
+    Ingame = {"goose.mp3", "stream"}
 }
 
 function RefreshLevels()
@@ -29,6 +31,9 @@ function RefreshLevels()
 end
 
 function BackToMenu()
+    sounds.Ingame:stop()
+    sounds.Menu:play()
+
     menu.Enabled = true
 
     hostButton:SetColor(1,1,1,1)
@@ -39,6 +44,12 @@ function love.load()
     for name, sound in pairs(sounds) do
         sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
     end
+    
+    sounds.Menu:setLooping(true)
+    sounds.Ingame:setLooping(true)
+    sounds.Menu:setVolume(0.4)
+    sounds.Ingame:setVolume(0.4)
+    sounds.Menu:play()
 
     love.window.setTitle("Goose Platformer Together")
     love.window.setIcon(love.image.newImageData("/img/player.png"))
@@ -77,6 +88,7 @@ function love.load()
         joinOptionsScreen.Enabled = false
         
         sounds.Select:play()
+        
 
         --[[server:Start()
         
@@ -175,6 +187,9 @@ function love.load()
 
         menu.Enabled = false
         joinOptionsScreen.Enabled = false
+        
+        sounds.Menu:stop()
+        sounds.Ingame:play()
     end
     
     confirmJoin.MouseEnter = function ()
@@ -322,6 +337,9 @@ function love.load()
         
         menu.Enabled = false
         hostOptionsScreen.Enabled = false
+        
+        sounds.Menu:stop()
+        sounds.Ingame:play()
     end
     
     confirmHost.MouseEnter = function ()
