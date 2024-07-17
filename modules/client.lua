@@ -51,7 +51,7 @@ function client:Init(f)
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
-
+    
     for name, sound in pairs(sounds) do
         sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
     end

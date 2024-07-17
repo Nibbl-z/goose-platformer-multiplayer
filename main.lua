@@ -3,6 +3,7 @@ local client = require("modules.client")
 
 local screen = require("yan.instance.ui.screen")
 local imagebutton = require("yan.instance.ui.imagebutton")
+local image = require("yan.instance.ui.image")
 local textbutton = require("yan.instance.ui.textbutton")
 local textinput = require("yan.instance.ui.textinput")
 local guiBase = require("yan.instance.ui.guibase")
@@ -10,6 +11,10 @@ local label = require("yan.instance.ui.label")
 
 local levelList = {}
 local currentLevel = 1
+
+local sounds = {
+    Select = {"select.wav", "static"}
+}
 
 function RefreshLevels()
     love.filesystem.setIdentity("goose-platformer-multiplayer")
@@ -25,14 +30,28 @@ end
 
 function BackToMenu()
     menu.Enabled = true
+
+    hostButton:SetColor(1,1,1,1)
+    joinButton:SetColor(1,1,1,1)
 end
 
 function love.load()
+    for name, sound in pairs(sounds) do
+        sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
+    end
+
+    love.window.setTitle("Goose Platformer Together")
+    love.window.setIcon(love.image.newImageData("/img/player.png"))
+    
     RefreshLevels()
 
     menu = screen:New(nil) 
     menu.Enabled = true
     
+    title = image:New(nil, menu, "/img/title.png")
+    title:SetPosition(0,10,0,10)
+    title:SetSize(0,800,0,60)
+
     hostButton = imagebutton:New(nil, menu, "/img/host_btn.png")
     
     hostButton:SetPosition(1, -10, 0, 80)
@@ -52,8 +71,13 @@ function love.load()
     hostButton.MouseDown = function()
         hostButton:SetColor(0.5,0.5,0.5,1)
 
+        joinButton:SetColor(1,1,1,1)
+
         hostOptionsScreen.Enabled = true
         joinOptionsScreen.Enabled = false
+        
+        sounds.Select:play()
+
         --[[server:Start()
         
         client:Init()
@@ -81,8 +105,11 @@ function love.load()
     end
     joinButton.MouseDown = function ()
         joinButton:SetColor(0.5,0.5,0.5,1)
+        hostButton:SetColor(1,1,1,1)
         joinOptionsScreen.Enabled = true
         hostOptionsScreen.Enabled = false
+
+        sounds.Select:play()
     end
 
     joinOptionsScreen = screen:New(nil)
@@ -97,6 +124,8 @@ function love.load()
 
     ipInput.MouseDown = function ()
         ipInput:SetColor(0.6, 0.6, 0.6,1)
+
+        sounds.Select:play()
     end
     
     ipInput.MouseEnter = function ()
@@ -117,6 +146,8 @@ function love.load()
     
     usernameInput.MouseDown = function ()
         usernameInput:SetColor(0.6, 0.6, 0.6,1)
+
+        sounds.Select:play()
     end
     
     usernameInput.MouseEnter = function ()
@@ -135,6 +166,8 @@ function love.load()
     confirmJoin:SetAnchorPoint(0,0)
     
     confirmJoin.MouseDown = function ()
+        sounds.Select:play()
+
         confirmJoin:SetButtonColor(0.6, 0.6, 0.6, 1)
 
         client:Init(BackToMenu)
@@ -168,6 +201,8 @@ function love.load()
     leftBtn:SetColor(0,0,0,1)
     
     leftBtn.MouseDown = function ()
+        sounds.Select:play()
+
         leftBtn:SetButtonColor(0.6, 0.6, 0.6, 1)
 
         currentLevel = currentLevel - 1
@@ -204,6 +239,8 @@ function love.load()
     rightBtn:SetColor(0,0,0,1)
     
     rightBtn.MouseDown = function ()
+        sounds.Select:play()
+
         rightBtn:SetButtonColor(0.6, 0.6, 0.6, 1)
 
         currentLevel = currentLevel + 1
@@ -253,6 +290,8 @@ function love.load()
     hostusernameInput:SetPlaceholderTextColor(0.5,0.5,0.5,1)
     
     hostusernameInput.MouseDown = function ()
+        sounds.Select:play()
+        
         hostusernameInput:SetColor(0.6, 0.6, 0.6,1)
     end
     
@@ -272,6 +311,8 @@ function love.load()
     confirmHost:SetAnchorPoint(0,0)
     
     confirmHost.MouseDown = function ()
+        sounds.Select:play()
+
         confirmHost:SetButtonColor(0.6, 0.6, 0.6, 1)
         
         server:Start(levelList[currentLevel])
