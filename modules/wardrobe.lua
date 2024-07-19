@@ -5,12 +5,19 @@ local imagebutton = require("yan.instance.ui.imagebutton")
 local image = require("yan.instance.ui.image")
 
 wardrobe.Cosmetics = {
-    "angry.png",
-    "hat.png",
-    "necklace.png",
+    "amongus_cosplay.png",
     "purple goose cosplay.png",
     "shocked.png",
-    "sneakers.png"
+    "sneakers.png",
+    "creature.png",
+    "dinosaur_spikes.png",
+    "ghost.png",
+    "legs.png",
+    "little goose.png",
+    "wheels.png",
+    "angry.png",
+    "hat.png",
+    "necklace.png"
 }
 
 local cosmeticButtons = {}
@@ -30,16 +37,19 @@ function wardrobe:Init(client)
     previewGoose:SetPosition(1, -50, 0.5, 0)
     previewGoose:SetSize(0,200,0,200)
     previewGoose:SetAnchorPoint(1, 0.5)
+    
+    local row = 0
+    local ri = 1
 
     for index, cosmetic in ipairs(self.Cosmetics) do
         client.cosmetics[cosmetic] = false
 
         local goose = image:New(nil, wardrobeScreen, "/img/player.png")
-        goose:SetPosition(0,10,0, 70 + (index * 60))
+        goose:SetPosition(0,10 + (row * 60), 0, 70 + (ri * 60))
         goose:SetSize(0,50,0,50)
         
         local button = imagebutton:New(nil, wardrobeScreen, "/img/"..cosmetic)
-        button:SetPosition(0,10,0, 70 + (index * 60))
+        button:SetPosition(0,10 + (row * 60),0, 70 + (ri * 60))
         button:SetSize(0,50,0,50)
         button.ZIndex = 2
 
@@ -86,8 +96,14 @@ function wardrobe:Init(client)
                 previewCosmetics[cosmetic]:SetColor(1,1,1,0)
             end
         end
-
+        
         table.insert(cosmeticButtons, button)
+        
+        ri = ri + 1
+        if ri > 5 then
+            ri = 1
+            row = row + 1
+        end
     end
     
     
