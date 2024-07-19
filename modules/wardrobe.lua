@@ -17,7 +17,7 @@ local cosmeticButtons = {}
 
 wardrobe.Open = false
 
-function wardrobe:Init()
+function wardrobe:Init(client)
     wardrobeScreen = screen:New(nil) 
     wardrobeScreen.Enabled = true
     
@@ -26,6 +26,8 @@ function wardrobe:Init()
     title:SetSize(0,500,0,50)
     
     for index, cosmetic in ipairs(self.Cosmetics) do
+        client.cosmetics[cosmetic] = false
+
         local goose = image:New(nil, wardrobeScreen, "/img/player.png")
         goose:SetPosition(0,10,0, 70 + (index * 60))
         goose:SetSize(0,50,0,50)
@@ -36,11 +38,35 @@ function wardrobe:Init()
         button.ZIndex = 2
 
         button.MouseEnter = function ()
-            button:SetColor(0.7,0.7,0.7,1)
+            if client.cosmetics[cosmetic] == true then
+                button:SetColor(0.3, 0.3, 0.3 ,1)
+                goose:SetColor(0.3, 0.3, 0.3 , 1)
+            else
+                button:SetColor(0.7,0.7,0.7,1)
+                goose:SetColor(0.7, 0.7, 0.7, 1)
+            end
         end
         
         button.MouseLeave = function ()
-            button:SetColor(1,1,1,1)
+            if client.cosmetics[cosmetic] == true then
+                button:SetColor(0.5, 0.5, 0.5, 1)
+                goose:SetColor(0.5, 0.5, 0.5, 1)
+            else
+                button:SetColor(1,1,1,1)
+                goose:SetColor(1,1,1,1)
+            end
+        end
+
+        button.MouseDown = function ()
+            client:ToggleCosmetic(cosmetic, not client.cosmetics[cosmetic])
+
+            if client.cosmetics[cosmetic] == true then
+                button:SetColor(0.5, 0.5, 0.5, 1)
+                goose:SetColor(0.5, 0.5, 0.5, 1)
+            else
+                button:SetColor(1,1,1,1)
+                goose:SetColor(1,1,1,1)
+            end
         end
 
         table.insert(cosmeticButtons, button)

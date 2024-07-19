@@ -43,7 +43,8 @@ function server:Start(map)
             x = 200,
             y = 0,
             direction = 1,
-            id = client:getIndex()
+            id = client:getIndex(),
+            cosmetics = {}
         }
         
         client:send("index", client:getIndex())
@@ -52,6 +53,10 @@ function server:Start(map)
     self.Server:on("setUsername", function (data, client)
         print(data)
         self.Geese[tostring(client:getIndex())].username = data
+    end)
+    
+    self.Server:on("toggleCosmetic", function (data, client)
+        self.Geese[tostring(client:getIndex())].cosmetics[data.cosmetic] = data.enabled
     end)
     
     self.Server:on("updatePosition", function (data, client)

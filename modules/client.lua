@@ -33,6 +33,8 @@ local sprites = {
     ChatBubble = "chat_bubble.png"
 }
 
+local cosmeticSprites = {}
+
 local sounds = {
     Death = {"death.wav", "static"},
     Checkpoint = {"checkpoint.wav", "static"}
@@ -47,6 +49,17 @@ local isInitialized = false
 client.flying = false
 client.airJumping = false
 
+client.cosmetics = {}
+
+function client:ToggleCosmetic(cosmeticName, enabled)
+    self.Client:send("toggleCosmetic", {
+        cosmetic = cosmeticName,
+        enabled = enabled
+    })
+
+    self.cosmetics[cosmeticName] = enabled
+end
+
 function client:Init(f)
     if isInitialized then return end
     isInitialized = true
@@ -54,6 +67,10 @@ function client:Init(f)
 
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
+    end
+    
+    for _, v in ipairs(wardrobe.Cosmetics) do
+        cosmeticSprites[v] = love.graphics.newImage("/img/"..v)
     end
     
     for name, sound in pairs(sounds) do
@@ -65,7 +82,7 @@ function client:Init(f)
     pause:Init(self)
     adminpanel:Init(self)
     chat:Init(self)
-    wardrobe:Init()
+    wardrobe:Init(self)
 end
 
 function client:Join(ip, port, name)
@@ -354,6 +371,12 @@ function client:Draw()
                 love.graphics.setColor(1,1,1,1)
             end
             
+            for c, e in pairs(g.cosmetics) do
+                if e then
+                    love.graphics.draw(cosmeticSprites[c], g.x - cameraX, g.y - cameraY, 0, g.direction, 1, 25, 25)
+                end
+            end
+
             if chats[tostring(g.id)] ~= nil then
                 if chats[tostring(g.id)].decayTime > love.timer.getTime() then
                     love.graphics.setColor(1,1,1,1)
@@ -375,6 +398,12 @@ function client:Draw()
     love.graphics.setColor(1,1,1,1)
     
     love.graphics.draw(sprites.Player, goose.body:getX() - cameraX, goose.body:getY() - cameraY, 0, goose.direction, 1, 25, 25)
+
+    for c, e in pairs(self.cosmetics) do
+        if e then
+            love.graphics.draw(cosmeticSprites[c], goose.body:getX() - cameraX, goose.body:getY() - cameraY, 0, goose.direction, 1, 25, 25)
+        end
+    end
     
     if chats[tostring(index)] ~= nil then
         if chats[tostring(index)].decayTime > love.timer.getTime() then
