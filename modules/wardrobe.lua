@@ -14,6 +14,7 @@ wardrobe.Cosmetics = {
 }
 
 local cosmeticButtons = {}
+local previewCosmetics = {}
 
 wardrobe.Open = false
 
@@ -25,6 +26,11 @@ function wardrobe:Init(client)
     title:SetPosition(0,10,0,10)
     title:SetSize(0,500,0,50)
     
+    local previewGoose = image:New(nil, wardrobeScreen, "/img/player.png")
+    previewGoose:SetPosition(1, -50, 0.5, 0)
+    previewGoose:SetSize(0,200,0,200)
+    previewGoose:SetAnchorPoint(1, 0.5)
+
     for index, cosmetic in ipairs(self.Cosmetics) do
         client.cosmetics[cosmetic] = false
 
@@ -36,6 +42,14 @@ function wardrobe:Init(client)
         button:SetPosition(0,10,0, 70 + (index * 60))
         button:SetSize(0,50,0,50)
         button.ZIndex = 2
+
+        local previewCosmetic = image:New(nil, wardrobeScreen, "/img/"..cosmetic)
+        previewCosmetic:SetPosition(1, -50, 0.5, 0)
+        previewCosmetic:SetSize(0,200,0,200)
+        previewCosmetic:SetAnchorPoint(1, 0.5)
+        previewCosmetic.ZIndex = 2 + index
+        previewCosmetic:SetColor(1,1,1,0)
+        previewCosmetics[cosmetic] = previewCosmetic
 
         button.MouseEnter = function ()
             if client.cosmetics[cosmetic] == true then
@@ -63,23 +77,29 @@ function wardrobe:Init(client)
             if client.cosmetics[cosmetic] == true then
                 button:SetColor(0.5, 0.5, 0.5, 1)
                 goose:SetColor(0.5, 0.5, 0.5, 1)
+
+                previewCosmetics[cosmetic]:SetColor(1,1,1,1)
             else
                 button:SetColor(1,1,1,1)
                 goose:SetColor(1,1,1,1)
+
+                previewCosmetics[cosmetic]:SetColor(1,1,1,0)
             end
         end
 
         table.insert(cosmeticButtons, button)
     end
+    
+    
 end
 
 function wardrobe:Update()
-    if self.open == false then return end
+    if self.Open == false then return end
     wardrobeScreen:Update()
 end
 
 function wardrobe:Draw()
-    if self.open == false then return end
+    if self.Open == false then return end
 
     love.graphics.setColor(1,1,0,0.5)
     love.graphics.rectangle("fill", 0,0,10000,10000)

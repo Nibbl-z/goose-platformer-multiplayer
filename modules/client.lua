@@ -338,16 +338,15 @@ function client:KeyPressed(key, scancode, rep)
     if key == "t" and chat.typing == false then
         chat.open = not chat.open
     end
-
+    
     if key == "c" and chat.typing == false then
-        wardrobe.open = not wardrobe.open
+        wardrobe.Open = not wardrobe.Open
     end
 
     chat:KeyPressed(key, scancode, rep)
 end
 
 function client:TextInput(t)
-    
     chat:TextInput(t)
 end
 
@@ -414,7 +413,7 @@ function client:Draw()
             love.graphics.setColor(1,1,1,1)
         end
     end
-
+    
     for _, p in ipairs(mapData) do
         if p.T == 1 then
             love.graphics.setColor(p.R, p.G, p.B, 1)
