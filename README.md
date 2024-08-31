@@ -2,6 +2,8 @@
 
 Goose Platformer Together is a modified version of Goose Platformer which adds multiplayer.
 
+![Screenshot](https://cloud-aflk734mj-hack-club-bot.vercel.app/0image.png)
+
 # How to host
 
 If you are hosting, you'll need some maps. This version does not include the editor, so you'll need [the original game](https://nibbl-z.itch.io/goose-platformer) to create some. Take the .goose files from the original game's save (AppData > Roaming > goose-platformer) and put them in this version's save (AppData > roaming > goose-platformer-multiplayer). Then you can host a server by clicking the Host button on the main menu, selecting a map, picking a username, and starting the server.
